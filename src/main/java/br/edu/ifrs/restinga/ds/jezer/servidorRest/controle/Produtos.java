@@ -6,13 +6,17 @@
 package br.edu.ifrs.restinga.ds.jezer.servidorRest.controle;
 
 import br.edu.ifrs.restinga.ds.jezer.servidorRest.dao.ProdutoDAO;
+import br.edu.ifrs.restinga.ds.jezer.servidorRest.erros.NaoEncontrado;
 import br.edu.ifrs.restinga.ds.jezer.servidorRest.modelo.Produto;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -29,22 +33,40 @@ public class Produtos {
     ProdutoDAO produtoDAO;
     
     @RequestMapping(path= "/produtos/", method =RequestMethod.GET)
+    @ResponseStatus(HttpStatus.OK)
     public Iterable<Produto> listar() {
         return produtoDAO.findAll();
     }
-    
+
     @RequestMapping(path ="/produtos/{id}", method =RequestMethod.GET)
+    @ResponseStatus(HttpStatus.OK)
     public Produto recuperar(@PathVariable int id) {
         Optional<Produto> optProduto = produtoDAO.findById(id);
         if(optProduto.isPresent()) {
             return optProduto.get();
         }
         else { 
-            return null;
+            throw new NaoEncontrado("ID não encontrada");
         }
         //return null;
     }
 
+    
+    
+/*
+Versão com  ResponseEntity
+    @RequestMapping(path ="/produtos/{id}", method =RequestMethod.GET)
+    public ResponseEntity<Produto> recuperar(@PathVariable int id) {
+        Optional<Produto> optProduto = produtoDAO.findById(id);
+        if(optProduto.isPresent()) {
+            return ResponseEntity.ok(optProduto.get());
+        }
+        else { 
+            return ResponseEntity.notFound().build();
+        }
+        //return null;
+    }
+*/
     @RequestMapping(path = "/produtos/", method =  RequestMethod.POST)
     public Produto inserir(@RequestBody Produto produto) {
         produto.setId(0);
