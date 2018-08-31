@@ -7,6 +7,7 @@ package br.edu.ifrs.restinga.ds.jezer.servidorRest.controle;
 
 import br.edu.ifrs.restinga.ds.jezer.servidorRest.dao.ProdutoDAO;
 import br.edu.ifrs.restinga.ds.jezer.servidorRest.erros.NaoEncontrado;
+import br.edu.ifrs.restinga.ds.jezer.servidorRest.erros.RequisicaoInvalida;
 import br.edu.ifrs.restinga.ds.jezer.servidorRest.modelo.Produto;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,6 +33,21 @@ public class Produtos {
 
     @Autowired
     ProdutoDAO produtoDAO;
+    
+    @RequestMapping( path = "/produtos/pesquisar/nome/", method = RequestMethod.GET)
+    public Iterable<Produto> pesquisaPorNome(
+            @RequestParam(required = false) String inicia, 
+            @RequestParam(required = false) String contem ) {
+        if(inicia!=null) {
+            return produtoDAO.findByNomeStartingWith(inicia);
+        }
+        if(contem!=null) {
+            return produtoDAO.findByNomeContaining(contem);
+        }
+        
+        throw new RequisicaoInvalida("Indique um dos 2 valores");
+    
+    }
     
     @RequestMapping(path= "/produtos/", method =RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)

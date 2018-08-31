@@ -16,4 +16,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ProdutoDAO extends CrudRepository<Produto, Integer> {
     
+    Iterable<Produto> findByNomeStartingWith(String nome);
+    
+    Iterable<Produto> findByNomeContaining(String nome);
+    
+    
 }
