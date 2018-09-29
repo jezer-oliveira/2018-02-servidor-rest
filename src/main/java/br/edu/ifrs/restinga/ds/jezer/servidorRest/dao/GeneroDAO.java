@@ -5,8 +5,9 @@
  */
 package br.edu.ifrs.restinga.ds.jezer.servidorRest.dao;
 
+
+
 import br.edu.ifrs.restinga.ds.jezer.servidorRest.modelo.Genero;
-import br.edu.ifrs.restinga.ds.jezer.servidorRest.modelo.Produto;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,14 +15,10 @@ import org.springframework.stereotype.Repository;
  *
  * @author jezer
  */
+
 @Repository
-public interface ProdutoDAO extends CrudRepository<Produto, Integer> {
+public interface GeneroDAO extends CrudRepository<Genero, Integer>{
     
-    Iterable<Produto> findByNomeStartingWith(String nome);
-    
-    Iterable<Produto> findByNomeContaining(String nome);
-    
-    Iterable<Produto> findByGenero(Genero genero);
     
     
 }

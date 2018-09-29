@@ -5,11 +5,19 @@
  */
 package br.edu.ifrs.restinga.ds.jezer.servidorRest.modelo;
 
-import javax.annotation.Generated;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 /**
  *
@@ -17,34 +25,27 @@ import javax.persistence.Id;
  */
 @Entity
 public class Produto {
-   /// Teste git
    @Id
    @GeneratedValue(strategy = GenerationType.IDENTITY)
    private int id;
    private String nome;
    private float valor;
-   private String descricao;
-   private int qtd;
-
-    public int getQtd() {
-        return qtd;
-    }
-
-    public void setQtd(int qtd) {
-        this.qtd = qtd;
-    }
+    
+   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+   @JoinColumn(unique = true)
+   private Embalagem embalagem;
    
+   @ManyToOne  
+   private Genero genero;
    
+   @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+   private List<Modelo> modelos;
 
-    public String getDescricao() {
-        return descricao;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
-    }
+   @JsonIgnore
+   @ManyToMany
+   private List<Fornecedor> fornecedores;
    
-
     public int getId() {
         return id;
     }
@@ -68,8 +69,36 @@ public class Produto {
     public void setValor(float valor) {
         this.valor = valor;
     }
-   
-   
-   
-    
+
+    public Embalagem getEmbalagem() {
+        return embalagem;
+    }
+
+    public void setEmbalagem(Embalagem embalagem) {
+        this.embalagem = embalagem;
+    }
+
+    public Genero getGenero() {
+        return genero;
+    }
+
+    public void setGenero(Genero genero) {
+        this.genero = genero;
+    }
+
+    public List<Modelo> getModelos() {
+        return modelos;
+    }
+
+    public void setModelos(List<Modelo> modelos) {
+        this.modelos = modelos;
+    }
+
+    public List<Fornecedor> getFornecedores() {
+        return fornecedores;
+    }
+
+    public void setFornecedores(List<Fornecedor> fornecedores) {
+        this.fornecedores = fornecedores;
+    }
 }

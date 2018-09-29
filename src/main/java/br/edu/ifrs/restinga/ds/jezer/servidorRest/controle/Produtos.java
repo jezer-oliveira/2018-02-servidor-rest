@@ -5,14 +5,16 @@
  */
 package br.edu.ifrs.restinga.ds.jezer.servidorRest.controle;
 
+import br.edu.ifrs.restinga.ds.jezer.servidorRest.dao.ModeloDAO;
 import br.edu.ifrs.restinga.ds.jezer.servidorRest.dao.ProdutoDAO;
 import br.edu.ifrs.restinga.ds.jezer.servidorRest.erros.NaoEncontrado;
 import br.edu.ifrs.restinga.ds.jezer.servidorRest.erros.RequisicaoInvalida;
+import br.edu.ifrs.restinga.ds.jezer.servidorRest.modelo.Modelo;
 import br.edu.ifrs.restinga.ds.jezer.servidorRest.modelo.Produto;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,14 +28,13 @@ import org.springframework.web.bind.annotation.RestController;
  * @author jezer
  */
 @RestController
+@RequestMapping(path = "/api")
 public class Produtos {
-    
-    //ArrayList<Produto> produtos;
-    //int cont=1;
-
     @Autowired
     ProdutoDAO produtoDAO;
-    
+    @Autowired
+    ModeloDAO modeloDAO;
+   
     @RequestMapping( path = "/produtos/pesquisar/nome/", method = RequestMethod.GET)
     public Iterable<Produto> pesquisaPorNome(
             @RequestParam(required = false) String inicia, 
@@ -105,12 +106,88 @@ Versão com  ResponseEntity
         Produto produtoAntigo = this.recuperar(id);
         produtoAntigo.setNome(produtoNovo.getNome());
         produtoAntigo.setValor(produtoNovo.getValor());
-        produtoAntigo.setDescricao(produtoNovo.getDescricao());
+        produtoAntigo.setEmbalagem(produtoNovo.getEmbalagem());
+        produtoAntigo.setGenero(produtoNovo.getGenero());
         
         produtoDAO.save(produtoAntigo);
-                
+    }
+    
+    
+    @RequestMapping(path = "/produtos/{idProduto}/modelos/", 
+            method = RequestMethod.GET)
+    public Iterable<Modelo> listarModelo(@PathVariable int idProduto) {
+        return this.recuperar(idProduto).getModelos();
+        /*
+        Optional<Produto> optProduto = produtoDAO.findById(idProduto);
+        if(optProduto.isPresent()) {
+            Produto produto= optProduto.get();
+            return produto.getModelos();
+        }
+        else { 
+            throw new NaoEncontrado("ID não encontrada");
+        }
+
+        
+        
+        */
+       // 
+    }
+
+    
+    @RequestMapping(path = "/produtos/{idProduto}/modelos/", 
+            method = RequestMethod.POST)
+    @ResponseStatus(HttpStatus.CREATED)
+    public Modelo inserirModelo(@PathVariable int idProduto, 
+            @RequestBody Modelo modelo) {
+        modelo.setId(0);
+        Modelo modeloSalvo = modeloDAO.save(modelo);
+        Produto produto = this.recuperar(idProduto);
+        produto.getModelos().add(modeloSalvo);
+        produtoDAO.save(produto);
+        return modeloSalvo;
+    }
+
+    @RequestMapping(path = "/produtos/{idProduto}/modelos/{id}", method = RequestMethod.GET)
+    public Modelo recuperarModelo(@PathVariable int idProduto, @PathVariable int id) {
+        Optional<Modelo> findById = modeloDAO.findById(id);
+        if(findById.isPresent())
+            return findById.get();
+        else 
+            throw new NaoEncontrado("Não encontrado");
+    }
+    
+    @RequestMapping(path = "/produtos/{idProduto}/modelos/{id}", 
+            method = RequestMethod.PUT)
+    @ResponseStatus(HttpStatus.OK)
+    public void atualizarModelo(@PathVariable int idProduto, @PathVariable int id, @RequestBody Modelo modelo){
+        if(modeloDAO.existsById(id)){
+            modelo.setId(id);
+            modeloDAO.save(modelo);
+        } else 
+            throw new NaoEncontrado("Não encontrado");
     
     }
+    
+    @RequestMapping(path= "/produtos/{idProduto}/modelos/{id}", method = RequestMethod.DELETE)
+    @ResponseStatus(HttpStatus.OK)
+    public void apagarModelo(@PathVariable int idProduto, 
+            @PathVariable int id) {
+        
+        Modelo modeloAchada=null;
+        Produto produto = this.recuperar(idProduto);
+        List<Modelo> modelos = produto.getModelos();
+        for (Modelo modeloLista : modelos) {
+            if(id==modeloLista.getId())
+                modeloAchada=modeloLista;
+        }
+        if(modeloAchada!=null) {
+            produto.getModelos().remove(modeloAchada);
+            produtoDAO.save(produto);
+        } else 
+            throw new NaoEncontrado("Não encontrado");
+    }
+
+    
 }
 
 
