@@ -5,10 +5,12 @@
  */
 package br.edu.ifrs.restinga.ds.jezer.servidorRest.controle;
 
+import br.edu.ifrs.restinga.ds.jezer.servidorRest.dao.FornecedorDAO;
 import br.edu.ifrs.restinga.ds.jezer.servidorRest.dao.ModeloDAO;
 import br.edu.ifrs.restinga.ds.jezer.servidorRest.dao.ProdutoDAO;
 import br.edu.ifrs.restinga.ds.jezer.servidorRest.erros.NaoEncontrado;
 import br.edu.ifrs.restinga.ds.jezer.servidorRest.erros.RequisicaoInvalida;
+import br.edu.ifrs.restinga.ds.jezer.servidorRest.modelo.Fornecedor;
 import br.edu.ifrs.restinga.ds.jezer.servidorRest.modelo.Modelo;
 import br.edu.ifrs.restinga.ds.jezer.servidorRest.modelo.Produto;
 import java.util.List;
@@ -34,6 +36,9 @@ public class Produtos {
     ProdutoDAO produtoDAO;
     @Autowired
     ModeloDAO modeloDAO;
+    
+    @Autowired
+    FornecedorDAO fornecedorDAO;
    
     @RequestMapping( path = "/produtos/pesquisar/nome/", method = RequestMethod.GET)
     public Iterable<Produto> pesquisaPorNome(
@@ -182,6 +187,58 @@ Versão com  ResponseEntity
         }
         if(modeloAchada!=null) {
             produto.getModelos().remove(modeloAchada);
+            produtoDAO.save(produto);
+        } else 
+            throw new NaoEncontrado("Não encontrado");
+    }
+
+
+
+
+    
+  @RequestMapping(path = "/produtos/{idProduto}/fornecedores/", 
+            method = RequestMethod.GET)
+    public Iterable<Fornecedor> listarFornecedor(@PathVariable int idProduto) {
+        return this.recuperar(idProduto).getFornecedores();
+    }
+
+    
+    @RequestMapping(path = "/produtos/{idProduto}/fornecedores/", 
+            method = RequestMethod.POST)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void inserirFornecedor(@PathVariable int idProduto, 
+            @RequestBody Fornecedor fornecedor) {
+        Produto produto = this.recuperar(idProduto);
+        produto.getFornecedores().add(fornecedor);
+        produtoDAO.save(produto);
+    }
+
+    @RequestMapping(path = "/produtos/{idProduto}/fornecedores/{id}", method = RequestMethod.GET)
+    public Fornecedor recuperarFornecedor(@PathVariable int idProduto, @PathVariable int id) {
+        Produto produto = this.recuperar(idProduto);
+        List<Fornecedor> fornecedores = produto.getFornecedores();
+        for (Fornecedor fornecedor : fornecedores) {
+            if(fornecedor.getId()==id)
+                return fornecedor;
+        }
+        throw new NaoEncontrado("Não encontrado");
+    }
+    
+       
+    @RequestMapping(path= "/produtos/{idProduto}/fornecedores/{id}", method = RequestMethod.DELETE)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void apagarFornecedor(@PathVariable int idProduto, 
+            @PathVariable int id) {
+        
+        Fornecedor fornecedorAchado=null;
+        Produto produto = this.recuperar(idProduto);
+        List<Fornecedor> fornecedores = produto.getFornecedores();
+        for (Fornecedor fornecedorLista : fornecedores) {
+            if(id==fornecedorLista.getId())
+                fornecedorAchado=fornecedorLista;
+        }
+        if(fornecedorAchado!=null) {
+            produto.getFornecedores().remove(fornecedorAchado);
             produtoDAO.save(produto);
         } else 
             throw new NaoEncontrado("Não encontrado");
