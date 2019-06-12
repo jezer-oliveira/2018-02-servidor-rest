@@ -46,7 +46,7 @@ public class Fornecedores {
     public Fornecedor recuperar(@PathVariable int id) {
         Optional<Fornecedor> findById = fornecedorDAO.findById(id);
         if (findById.isPresent()) {
-            // mudei aqui
+            // mudei aqui 2
             return findById.get(); 
         } else {
             throw new NaoEncontrado("Não encontrado");
